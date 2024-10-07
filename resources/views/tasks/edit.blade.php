@@ -4,7 +4,7 @@
 <div class="container">
     <h1>Edit Task</h1>
 
-    <form action="{{ route('tasks.update', $task) }}" method="POST">
+    <form id="create-form" action="{{ route('tasks.update', $task) }}" method="POST">
         @csrf
         @method('PUT')
 
@@ -35,4 +35,7 @@
     </form>
 </div>
 @endsection
-s
+@section('form-submit-js')
+<script src="{{ asset('task.js') }}"></script>
+<script src="{{ asset('common.js') }}"></script>
+@endsection

@@ -8,26 +8,36 @@ use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
-    public function __construct() {
+    public function __construct()
+    {
         $this->middleware('auth');
     }
 
     // Display a list
-    public function index() {
-        $tasks = Task::where('user_id', Auth::id())->orWhereHas('sharedWith', function($query) {
-            $query->where('user_id', Auth::id());
-        })->get();
-        
-        return view('tasks.index', compact('tasks'));
+    public function index(Request $request)
+    {
+        $tasks = Task::where('user_id', Auth::id())
+            ->orWhereHas('sharedWith', function ($query) {
+                $query->where('user_id', Auth::id());
+            })
+            ->get();
+
+        if ($request->ajax()) {
+            return response()->json($tasks);
+        }
+
+        return view('tasks.index');
     }
 
     // creating a new task
-    public function create() {
+    public function create()
+    {
         return view('tasks.create');
     }
 
     // Store 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         $request->validate([
             'title' => 'required',
             'description' => 'nullable',
@@ -41,17 +51,24 @@ class TaskController extends Controller
         $task->user_id = Auth::id();
         $task->save();
 
-        return redirect()->route('tasks.index')->with('success', 'Task created successfully');
+        // return redirect()->route('tasks.index')->with('success', 'Task created successfully');
+        return response()->json([
+            'base_url' => url('/') . '/tasks',
+            'status' => 'success',
+            'message' => 'Task created successfully',
+        ], 200);
     }
 
     // edit 
-    public function edit(Task $task) {
-        $this->authorize('update', $task); 
+    public function edit(Task $task)
+    {
+        $this->authorize('update', $task);
         return view('tasks.edit', compact('task'));
     }
 
     // Update 
-    public function update(Request $request, Task $task) {
+    public function update(Request $request, Task $task)
+    {
         $this->authorize('update', $task);
 
         $request->validate([
@@ -66,11 +83,17 @@ class TaskController extends Controller
         $task->status = $request->status;
         $task->save();
 
-        return redirect()->route('tasks.index')->with('success', 'Task updated successfully');
+        // return redirect()->route('tasks.index')->with('success', 'Task updated successfully');
+        return response()->json([
+            'base_url' => url('/') . '/tasks',
+            'status' => 'success',
+            'message' => 'Task update successfully',
+        ], 200);
     }
 
     // Delete t
-    public function destroy(Task $task) {
+    public function destroy(Task $task)
+    {
         $this->authorize('delete', $task);
         $task->delete();
 
@@ -78,13 +101,13 @@ class TaskController extends Controller
     }
 
     // share task
-    public function share(Request $request, Task $task) {
+    public function share(Request $request, Task $task)
+    {
         $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
-    
+
         $task->sharedWith()->attach($request->user_id);
         return back()->with('success', 'Task shared successfully.');
     }
 }
-

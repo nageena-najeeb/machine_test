@@ -4,7 +4,7 @@
 <div class="container">
     <h1>Create New Task</h1>
 
-    <form action="{{ route('tasks.store') }}" method="POST">
+    <form id="create-form" action="{{ route('tasks.store') }}" method="POST">
         @csrf
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
@@ -24,4 +24,9 @@
         <button type="submit" class="btn btn-success">Create Task</button>
     </form>
 </div>
+@endsection
+@section('form-submit-js')
+<script src="{{ asset('task.js') }}"></script>
+<script src="{{ asset('common.js') }}"></script>
+
 @endsection
